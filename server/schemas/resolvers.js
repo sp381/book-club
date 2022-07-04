@@ -16,45 +16,24 @@ const resolvers = {
 
       throw new AuthenticationError('Not logged in');
     },
-    user: async (parent, { username }) => {
-      return User.findOne({ username })
-        .select('-__v -password')
-        .populate('username')
-        .populate('email');
-    },
-    books: async (parent, { username }) => {
-      const params = username ? { username } : {};
-      return Book.find(params).sort({ createdAt: -1 });
-    },
-    books: async (parent, { _id }) => {
-      return Book.findOne({ _id });
-    }
-  },
+    
+    // login: async (parent, { email, password }) => {
+    //   const user = await User.findOne({ email });
 
-  Mutation: {
-    addUser: async (parent, args) => {
-      const user = await User.create(args);
-      const token = signToken(user);
+    //   if (!user) {
+    //     throw new AuthenticationError('Incorrect credentials');
+    //   }
 
-      return { token, user };
-    },
-    login: async (parent, { email, password }) => {
-      const user = await User.findOne({ email });
+    //   const correctPw = await user.isCorrectPassword(password);
 
-      if (!user) {
-        throw new AuthenticationError('Incorrect credentials');
-      }
+    //   if (!correctPw) {
+    //     throw new AuthenticationError('Incorrect credentials');
+    //   }
 
-      const correctPw = await user.isCorrectPassword(password);
-
-      if (!correctPw) {
-        throw new AuthenticationError('Incorrect credentials');
-      }
-
-      const token = signToken(user);
-      return { token, user };
-    },
-    addBook: async (parent, args, context) => {
+    //   const token = signToken(user);
+    //   return { token, user };
+    // },
+    saveBook: async (parent, args, context) => {
       if (context.book) {
         const book = await Book.create({ ...args, author: context.user.author });
 
