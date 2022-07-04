@@ -8,7 +8,6 @@ const resolvers = {
       if (context.user) {
         const userData = await User.findOne({ _id: context.user._id })
           .select('-__v -password')
-          .populate('user')
           .populate('book')
 
         return userData;
@@ -16,23 +15,32 @@ const resolvers = {
 
       throw new AuthenticationError('Not logged in');
     },
-    
-    // login: async (parent, { email, password }) => {
-    //   const user = await User.findOne({ email });
+  },
+  Mutation: {
 
-    //   if (!user) {
-    //     throw new AuthenticationError('Incorrect credentials');
-    //   }
+    addUser: async function (parent, args) {
+        const user = await User.create(args);
+        const token = signToken(user);
 
-    //   const correctPw = await user.isCorrectPassword(password);
+        return { token, user }
+    },
 
-    //   if (!correctPw) {
-    //     throw new AuthenticationError('Incorrect credentials');
-    //   }
+    login: async (parent, { email, password }) => {
+      const user = await User.findOne({ email });
 
-    //   const token = signToken(user);
-    //   return { token, user };
-    // },
+      if (!user) {
+        throw new AuthenticationError('Incorrect credentials');
+      }
+
+      const correctPw = await user.isCorrectPassword(password);
+
+      if (!correctPw) {
+        throw new AuthenticationError('Incorrect credentials');
+      }
+
+      const token = signToken(user);
+      return { token, user };
+    },
     saveBook: async (parent, args, context) => {
       if (context.book) {
         const book = await Book.create({ ...args, author: context.user.author });
@@ -48,7 +56,7 @@ const resolvers = {
 
       throw new AuthenticationError('You need to be logged in!');
     },
-  }
+  },
 };
 
 module.exports = resolvers;
